@@ -3,6 +3,7 @@ import { addDoc,getDocs ,collection } from "firebase/firestore";
 import { getAuth, onAuthStateChanged } from "firebase/auth";
 import { db } from "../config/firebase";
 import { useLocation } from "react-router-dom";
+import { useForm } from "react-hook-form";
 
 function Details() {
   const location = useLocation();
@@ -16,25 +17,40 @@ function Details() {
   const [number, setNumber] = useState("");
   const [email, setEmail] = useState("");
 
-  const CheckOut = async () => {
+  const { register, handleSubmit, formState: { errors } } = useForm();
+
+  
+  const handleFormSubmit = async (formData) => {
     try {
       const authUser = getAuth().currentUser;
       if (authUser) {
-        const docRef = await getDocs(collection(db, "Cart" + authUser.uid), {
+        const docRef = await addDoc(collection(db, "Cart" + authUser.uid), {
           owner_uid: authUser.uid,
-          Profile: profile,
-          Price: date,
+          Profile: formData.profile,
+          Price: parseInt(data.price) * count,
           Amount: count,
-
-          Number: number,
-          Address: address,
+          Date: formData.date,
+          Number: formData.number,
+          Address: formData.address, 
+          Room: data.name,       
         });
-
+        alert("Thank You for Booking with us")
         console.log("Document written with ID: ", docRef.id);
+        const docRef1 = await addDoc(collection(db, "Cart"), {
+          owner_uid: authUser.uid,
+          Profile: formData.profile,
+          Price: parseInt(data.price) * count,
+          Amount: count,
+          Date: formData.date,
+          Number: formData.number,
+          Address: formData.address,
+          Room: data.name,      
+        });
       } else {
         console.error("User not authenticated");
       }
     } catch (e) {
+      alert('error')
       console.error("Error adding document: ", e);
     }
   };
@@ -82,77 +98,58 @@ function Details() {
           </div>
           _____________________________________________________________
           <form>
-            <label
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                fontSize: "30px",
-                fontWeight: "bold",
-              }}
-            >
-              NAME
-            </label>
-            <input
-              placeholder="Name..."
-              className="input"
-              value={profile}
-              onChange={(e) => setProfile(e.target.value)}
-            />
-            <label
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                fontSize: "24px",
-                fontWeight: "bold",
-                marginBottom: "10px"
-              }}
-            >
-              PHONE NO.
-            </label>
-            <input
-              placeholder="Number..."
-              className="input"
-              value={number}
-              onChange={(e) => setNumber(e.target.value)}
-            />
-            <label
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                fontSize: "24px",
-                fontWeight: "bold",
-                marginBottom: "10px"
-              }}
-            >
-              ADDRESS
-            </label>
-            <input
-              placeholder="Address..."
-              className="input"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-            />
-            <label
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                fontSize: "24px",
-                fontWeight: "bold",
-                marginBottom: "10px"
-              }}
-            >
-              DATE
-            </label>
-            <input
-              placeholder="Name..."
-              className="input"
-              type="date"
-              value={date}
-              onChange={(e) => setDate(e.target.value)}
-            />
-          </form>
 
-          <div className="count">
+          <label htmlFor="profile">Name</label>
+            <input
+              {...register("profile", {
+                required: "Username is required",
+                pattern: {
+                  value: /^[A-Z0-9._%+-]+$/i,
+                  message: "Invalid username (only letters, numbers, and special characters ._%+- are allowed)",
+                },
+              })}
+              placeholder="Username"
+            />
+            {errors.name && <span  style={{color: 'red'}} className="error">{errors.name.message}</span>}
+
+            <label htmlFor="number">Number</label>
+        <input
+          {...register("number", {
+            required: "Number is required",
+            pattern: {
+              value: /^[0-9]+$/i,
+              message: "Invalid number (only numbers are allowed)",
+            },
+            minLength: {
+              value: 10,
+              message: "Password must have at least 10 characters",
+              
+            },
+          })}
+          placeholder="Number"
+        />
+        {errors.number && <span style={{ color: 'red' }} className="error">{errors.number.message}</span>}
+
+            <label htmlFor="address">Address</label>
+        <input
+          {...register("address", {
+            required: "Address is required",
+          })}
+          placeholder="Address..."
+        />
+        {errors.address && <span style={{ color: 'red' }} className="error">{errors.address.message}</span>}
+
+            <label htmlFor="date">Date</label>
+        <input
+          {...register("date", {
+            required: "Date is required",
+          })}
+          type="date"
+        />
+        {errors.date && <span style={{ color: 'red' }} className="error">{errors.date.message}</span>}
+
+        </form>
+        <div className="count">
             <button
               className="plus"
               onClick={() => setCount(Math.max(count - 1, 1))}
@@ -164,7 +161,11 @@ function Details() {
               +
             </button>
           </div>
-          <button className="button1" onClick={CheckOut}>Book Now!</button>
+          <button className="button1"   onClick={handleSubmit(handleFormSubmit)} >Book Now!</button>          
+
+
+
+          
         </div>
       </div>
       <div className="about">

@@ -1,0 +1,80 @@
+/* profile.css */
+
+.container1 {
+  display: flex;
+  justify-content: center;
+  margin-top: 200px;
+
+}
+
+.profile-container {
+  background-color: #f0f0f0;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+  max-width: 600px;
+  width: 100%;
+}
+
+.profile-details {
+  margin-bottom: 20px;
+}
+
+.detail {
+  margin-bottom: 15px;
+}
+
+.label {
+  font-weight: bold;
+  margin-right: 10px;
+}
+
+.input-field {
+  width: 100%;
+  padding: 8px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  box-sizing: border-box;
+}
+
+.buttons {
+  display: flex;
+  justify-content: space-between;
+}
+
+.buttons button {
+  padding: 10px;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.buttons button.edit-btn {
+  background-color: #007bff;
+  color: #fff;
+}
+
+
+
+
+.profile-image {
+  width: 200px;
+  height: 200px;
+  object-fit: cover;
+  border-radius: 50%;
+  margin-bottom: 10px;
+}
+
+.file-input {
+  display: none;
+}
+
+.custom-file-upload {
+  background-color: #007bff;
+  color: #fff;
+  padding: 8px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+/* Add more styles as needed */

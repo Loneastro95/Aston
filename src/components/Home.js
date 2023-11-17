@@ -9,8 +9,8 @@ function Home() {
       <div className="top">
         <h1 className="text">Aston</h1>
         <div className="button" style={{marginBottom:'20px'}}>
-          <button className="btn"  >Home</button>
-          <Link to="/About"> <button className="btn"  style={{marginLeft:'13px'}}>About Us</button></Link>
+          {/* <button className="btn"  >Home</button>
+          <Link to="/About"> <button className="btn"  style={{marginLeft:'13px'}}>About Us</button></Link> */}
           {/* <Link to="/Rooms"><button className="btn"   style={{marginRight:'50px'}}>Rooms</button></Link> */}
           <Link to="/"><button className="btn2" style={{marginTop:'30px'}}>Log Out</button></Link>
         </div>
@@ -58,7 +58,7 @@ function Home() {
             </div>
             <div className='pic2' />
           </div>
-          <div><Rooms  /></div>
+          <div style={{marginTop: '130px'}}><Rooms  /></div>
     </div>
   );
 }

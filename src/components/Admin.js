@@ -1,60 +1,100 @@
 import React, { useState, useEffect } from "react";
-import { getDocs, collection } from "firebase/firestore";
-import { getAuth } from "firebase/auth";
-import { db } from "../config/firebase";
+import { signOut } from "firebase/auth";
+import { auth } from "../config/firebase";
+import { collection, getDocs } from 'firebase/firestore';
+import { db } from '../config/firebase';
+import { getAuth } from 'firebase/auth'
 import { Link } from "react-router-dom";
+import axios from 'axios';
+import { useNavigate} from "react-router-dom";
 
 function Admin() {
-  const [floor1, setFloor1] = useState([]); // State to store fetched data
-  const authUser = getAuth().currentUser; // Get the current user
+  const [cart, setCart] = useState([]);
+  
+  const navigate =  useNavigate()
 
-  const fetchCategory = async (category) => {
+
+  const Signout = () => {
+    signOut(auth)
+      .then(() => {
+        alert('Log out successful');
+       navigate("/");
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  };
+
+  const fetchSides = async (searchDate) => {
     try {
-      // Fetch documents from the specified collection (e.g., "Cart" + authUser.uid + category)
-      const querySnapshot = await getDocs(collection(db, "Cart" + authUser.uid, category));
+      const querySnapshot = await getDocs(collection(db, "Cart"));
       const newData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-      setFloor1(newData); // Update state with fetched data
+      // If searchDate is provided, filter newData based on the date
+      const filteredData = searchDate
+        ? newData.filter((item) => {
+            const itemDate = new Date(item.Date);
+            const inputDate = new Date(searchDate);
+            return (
+              itemDate.getFullYear() === inputDate.getFullYear() &&
+              itemDate.getMonth() === inputDate.getMonth() &&
+              itemDate.getDate() === inputDate.getDate()
+            );
+          })
+        : newData;
+      setCart(filteredData);
+      console.log(filteredData);
     } catch (error) {
-      console.error(`Error fetching ${category}: `, error);
-      // Handle error if necessary
+      alert("error");
+      console.error("Error fetching menu: ", error);
     }
   };
 
-  useEffect(() => {
-    fetchCategory("floor1"); // Fetch "floor1" data on component mount
-  }, []); // Empty dependency array ensures the effect runs only once after initial render
-
-  const test = (category) => {
-    alert(category);
-    fetchCategory(category); // Fetch data for the selected category
-  };
+  const [query, setQuery] = useState("");
 
   return (
     <div className="container">
       <div className="top">
         <h1 className="text">Aston</h1>
-        <div className="button" style={{ marginBottom: "20px", display: "flex", flexDirection: "row" }}>
+        <div className="button" style={{ display: "flex", flexDirection: "row" }}>
           <h1 className="maintext" style={{ marginRight: "450px" }}>
             Admin Page
           </h1>
-          <Link to="/">
-            <button className="btn2" style={{ marginTop: "30px" }}>
+
+            <button className="btn2" onClick={Signout} style={{ marginTop: "30px" }}>
               Log Out
             </button>
-          </Link>
+
         </div>
       </div>
+
+      <form
+  style={{ alignItems: "center", marginBottom: "20px" }}
+  onSubmit={(e) => {
+    e.preventDefault();
+    fetchSides(query);
+  }}
+>
+  <input
+    type="date"
+    placeholder="Search..."
+    value={query}
+    onChange={(e) => setQuery(e.target.value)}
+  />
+  <button type="submit" className="submitBtn">
+    Submit
+  </button>
+</form>
       <div className="admin" style={{ display: 'flex', flexDirection: 'row'}}>
         <div className="left3">
-          <div className="btnRoom" style={{ display: 'flex', flexDirection: 'column', marginTop: '30px'}}>
-            <button style={{marginTop: '10px', marginBottom: '20px'}} className="btn4" onClick={() => test("floor1")}>
-              F1-R1,R2...
+          <div className="btnRoom" style={{ display: 'flex', flexDirection: 'column', marginTop: '30px', height: '700px'}}>
+            <button style={{marginTop: '10px', marginBottom: '20px'}} className="btn4" >
+              Bookings
             </button>
-            <button  style={{marginTop: '10px', marginBottom: '20px'}} className="btn4" onClick={() => test("second")}>
-              F2-R1,R2...
+            <button  style={{marginTop: '10px', marginBottom: '20px'}} className="btn4">
+              Rooms
             </button>
-            <button className="btn4" onClick={() => test("third")}>
-              F3-R1,R2...
+            <button className="btn4" >
+              
             </button>
           </div>
         </div>
@@ -70,13 +110,29 @@ function Admin() {
               </tr>
             </thead>
             <tbody>
-              {floor1.map((category) =>(
+              {cart.filter((item) => {
+      if (!query) {
+        // If no date input, show all records
+        return true;
+      }
+      
+      // Parse dates and compare
+      const itemDate = new Date(item.Date);
+      const inputDate = new Date(query);
+
+      // Check if the item's date matches the input date
+      return (
+        itemDate.getFullYear() === inputDate.getFullYear() &&
+        itemDate.getMonth() === inputDate.getMonth() &&
+        itemDate.getDate() === inputDate.getDate()
+      );
+    }).map((cart) =>(
               <tr>
-                <td>single</td>
-                <td>Ayanda</td>
-                <td>084 533 2436</td>
-                <td>20/07/2021</td>
-                <td>1</td>
+                <td>{cart.Room}</td>
+                <td>{cart.Profile}</td>
+                <td>{cart.Number}</td>
+                <td>{cart.Date}</td>
+                <td>{cart.Amount}</td>
               </tr>
               ))}
               </tbody>

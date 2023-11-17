@@ -1,75 +1,74 @@
 import React, { useState, useEffect } from "react";
-import {getAuth, sendPasswordResetEmail} from 'firebase/auth';
-import {auth} from '../config/firebase'
-import { Link } from "react-router-dom";
+import { getAuth, sendPasswordResetEmail } from "firebase/auth";
+import { auth } from "../config/firebase";
+import { Link, useNavigate } from "react-router-dom";
+import { useForm } from "react-hook-form";
 
 function Forgot() {
+  const [email, setEmail] = useState("");
 
-    const [email, setEmail] = useState('');
-    const [ password, setPassword] =useState('');
+  const navigate = useNavigate();
 
-    
-    const register = (() =>{
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+  } = useForm();
 
+  const onSubmit = (data) => {
+    const { password } = data;
 
-        sendPasswordResetEmail(auth, email, password)
-        .then((userCredential) => {
-          // Signed up 
-    
-          alert("Successfully Logged in")
-          
-          const user = userCredential.user;
-          // ...
-        })
-        .catch((error) => {
-          const errorCode = error.code;
-          const errorMessage = error.message;
-          // ..
-        });
-    
-       })
-    
+    sendPasswordResetEmail(auth, email, password)
+      .then((userCredential) => {
+        // Signed up
+
+        alert("Successfully Logged in");
+        navigate("/Forgot");
+        const user = userCredential.user;
+        // ...
+      })
+      .catch((error) => {
+        alert("error");
+
+        const errorCode = error.code;
+        const errorMessage = error.message;
+        // ..
+      });
+  };
 
   return (
-    <div className="container" style={{paddingLeft: '400px', paddingRight: '400px'}}>
-        <div className="main">
-        <div className="left2"  style={{marginTop: '50px'}}>
-        </div>
-        <div className="right2" style={{marginTop: '50px'}}>
-            <div className="imgsign"></div>
-            <h1>Log In</h1><br/>
-          <form>
-
-            <label
-              style={{
-                display: "flex",
-                alignItems: "flex-start",
-                fontSize: "24px",
-                
-                marginBottom: "10px"
-              }}
-            >
-              Email
-            </label>
+    <div
+      className="container"
+      style={{ paddingLeft: "400px", paddingRight: "400px" }}
+    >
+      <div className="main">
+        <div className="left2" style={{ marginTop: "50px" }}></div>
+        <div className="right2" style={{ marginTop: "50px" }}>
+          <div className="imgsign"></div>
+          <h1 style={{ marginLeft: "180px" }}>Sign Up</h1>
+          <br />
+          <form onSubmit={handleSubmit(onSubmit)}>
+            <label htmlFor="email">Email</label>
             <input
-              placeholder="test@gmai.com"
-              value={email}
+              {...register("email", {
+                required: "Email is required",
+                // Add email validation rules if needed
+              })}
               type="email"
-              onChange={(e) => setEmail(e.target.value)}
-             
+              placeholder="Email"
             />
+            {errors.email && (
+              <span style={{ color: "red" }} className="error">
+                {errors.email.message}
+              </span>
+            )}
 
+            <button className="button1">Rest Password</button>
           </form>
-          <div className="checkbox">
-
-          </div>
-          
-          <Link to="/"><button style={{marginTop: '40px'}} onClick={register} className="button1">Log In</button></Link>
-
         </div>
-          </div>
+      </div>
     </div>
-  )
+  );
 }
 
 export default Forgot;

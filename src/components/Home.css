@@ -175,6 +175,7 @@
   border-radius: 10px;
   background: #fff;
   cursor: pointer;
+  border-width: 1px;
 }
 
 .btn3 {
@@ -522,6 +523,7 @@ form {
   background-color: #000;
   color: #fff;
   border-radius: 10px;
+  margin-left: 32px;
 }
 
 .button1:hover {
@@ -556,6 +558,7 @@ label {
   height: 100px;
   margin-top: 60px;
   display: inline-block;
+  margin-left: 200px;
 }
 
 .aboutleft {
