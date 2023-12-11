@@ -1,18 +1,39 @@
-import React from "react";
+import React, {useRef} from "react";
 import "./Home.css";
 import { Link } from "react-router-dom";
 import Rooms from "./Rooms";
-
+import { signOut } from "firebase/auth";
+import { auth } from "../config/firebase";
+import { useNavigate } from "react-router-dom";
 function Home() {
+
+  const navigate = useNavigate();
+  const roomsRef = useRef(null);
+
+  const scrollToRooms = () => {
+    roomsRef.current.scrollIntoView({ behavior: "smooth" });
+  };
+
+  const Signout = () => {
+    signOut(auth)
+      .then(() => {
+        alert('Log out successful');
+       
+      })
+      .catch((error) => {
+        alert(error.message);
+      });
+  };
+
   return (
     <div className="container">
       <div className="top">
         <h1 className="text">Aston</h1>
         <div className="button" style={{marginBottom:'20px'}}>
-          {/* <button className="btn"  >Home</button>
-          <Link to="/About"> <button className="btn"  style={{marginLeft:'13px'}}>About Us</button></Link> */}
-          {/* <Link to="/Rooms"><button className="btn"   style={{marginRight:'50px'}}>Rooms</button></Link> */}
-          <Link to="/"><button className="btn2" style={{marginTop:'30px'}}>Log Out</button></Link>
+           <button className="btn">Home</button>
+          <Link to="/Profile"> <button className="btn"  style={{marginLeft:'13px'}}>Profile</button></Link> 
+           <button className="btn" onClick={scrollToRooms}  style={{marginRight:'50px'}}>Rooms</button>
+          <Link to="/"><button className="btn2" onClick={Signout} style={{marginTop:'30px'}}>Log Out</button></Link>
         </div>
       </div>
       <div className="main">
@@ -40,7 +61,7 @@ function Home() {
                     <br/> comfort & luxury at one of 
                     <br/> our many estabilshment.
                 </h1>
-                <button className="btn3">Book Now!</button>
+                <button className="btn3" onClick={scrollToRooms}>Book Now!</button>
             </div>
             </div>
         </div>
@@ -58,7 +79,7 @@ function Home() {
             </div>
             <div className='pic2' />
           </div>
-          <div style={{marginTop: '130px'}}><Rooms  /></div>
+          <div style={{marginTop: '130px'}} ref={roomsRef}><Rooms  /></div>
     </div>
   );
 }

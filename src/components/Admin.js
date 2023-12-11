@@ -25,15 +25,15 @@ function Admin() {
       });
   };
 
-  const fetchSides = async (searchDate) => {
+  const fetchCartData = async () => {
     try {
       const querySnapshot = await getDocs(collection(db, "Cart"));
       const newData = querySnapshot.docs.map((doc) => ({ ...doc.data(), id: doc.id }));
-      // If searchDate is provided, filter newData based on the date
-      const filteredData = searchDate
+
+      const filteredData = query
         ? newData.filter((item) => {
             const itemDate = new Date(item.Date);
-            const inputDate = new Date(searchDate);
+            const inputDate = new Date(query);
             return (
               itemDate.getFullYear() === inputDate.getFullYear() &&
               itemDate.getMonth() === inputDate.getMonth() &&
@@ -41,13 +41,20 @@ function Admin() {
             );
           })
         : newData;
+
+      console.log("Filtered Data:", filteredData);
+
       setCart(filteredData);
-      console.log(filteredData);
     } catch (error) {
-      alert("error");
+      alert("Error fetching data: " + error.message);
       console.error("Error fetching menu: ", error);
     }
   };
+
+  useEffect(() => {
+    // Fetch data when the component mounts
+    fetchCartData();
+  }, []);
 
   const [query, setQuery] = useState("");
 
@@ -68,22 +75,23 @@ function Admin() {
       </div>
 
       <form
-  style={{ alignItems: "center", marginBottom: "20px" }}
-  onSubmit={(e) => {
-    e.preventDefault();
-    fetchSides(query);
-  }}
->
-  <input
-    type="date"
-    placeholder="Search..."
-    value={query}
-    onChange={(e) => setQuery(e.target.value)}
-  />
-  <button type="submit" className="submitBtn">
-    Submit
-  </button>
-</form>
+        style={{ alignItems: "center", marginBottom: "20px" }}
+        onSubmit={(e) => {
+          e.preventDefault();
+          fetchCartData();
+        }}
+      >
+        <input
+          type="date"
+          placeholder="Search..."
+          value={query}
+          onChange={(e) => setQuery(e.target.value)}
+        />
+        <button type="submit" className="submitBtn">
+          Submit
+        </button>
+      </form>
+
       <div className="admin" style={{ display: 'flex', flexDirection: 'row'}}>
         <div className="left3">
           <div className="btnRoom" style={{ display: 'flex', flexDirection: 'column', marginTop: '30px', height: '700px'}}>
@@ -93,13 +101,11 @@ function Admin() {
             <button  style={{marginTop: '10px', marginBottom: '20px'}} className="btn4">
               Rooms
             </button>
-            <button className="btn4" >
-              
-            </button>
+
           </div>
         </div>
         <div className="right3">
-           <table>
+        <table>
             <thead style={{backgroundColor: '#000', color:'#fff'}}>
               <tr>
                 <th className="tablehead">Room</th>
@@ -127,7 +133,7 @@ function Admin() {
         itemDate.getDate() === inputDate.getDate()
       );
     }).map((cart) =>(
-              <tr>
+              <tr  key={cart.id}>
                 <td>{cart.Room}</td>
                 <td>{cart.Profile}</td>
                 <td>{cart.Number}</td>

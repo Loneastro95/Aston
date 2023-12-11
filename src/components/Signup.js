@@ -1,91 +1,166 @@
-import React from "react";
-import { useForm } from "react-hook-form";
+import React, { useState, useEffect } from "react";
 import { createUserWithEmailAndPassword } from "firebase/auth";
-import { auth } from "../config/firebase";
-import { useNavigate} from "react-router-dom";
-import "./Home.css";
+import { addDoc, collection } from "firebase/firestore";
+import { auth, db } from "../config/firebase";
+import { useNavigate } from "react-router-dom";
 
-function Signup() {
 
-  const navigate =  useNavigate()
+const Signup = () => {
+  const navigate = useNavigate();
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-  } = useForm();
+  const [password, setPassword] = useState("");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
+  const [address, setAddress] = useState("");
+  const [number, setNumber] = useState("");
 
-  const onSubmit = (data) => {
-    const { email, password , name } = data;
+  const [showPassword, setShowPassword] = useState(false);
+  const [errors, setErrors] = useState({});
+  const [isFormValid, setIsFormValid] = useState(false);
 
-    createUserWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        alert("Successfully Created");
-        const user = userCredential.user;
-        navigate('/Profile')
-      })
-      .catch((error) => {
-        alert("Error: " + error.message);
-      });
+  const toggleShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  useEffect(() => {
+    // Trigger form validation when email or password changes
+    validateForm();
+  }, [email, password, name, address, number]);
+
+  const validateForm = () => {
+    let errors = {};
+
+    // Validate email field
+    if (!email) {
+      errors.email = "Email is required.";
+    } else if (!/\S+@\S+\.\S+/.test(email)) {
+      errors.email = "Email is invalid.";
+    }
+
+    if (!name) {
+      errors.name = "Name is required.";
+    } else if (!/^[a-zA-Z\s]*$/.test(name)) {
+      errors.name = "Name is invalid.";
+    }
+
+    if (!address) {
+      errors.address = "Address is required.";
+    } else if (!/\S+/.test(address)) {
+      errors.address = "Address is invalid.";
+    }
+    // Validate password field
+    if (!password) {
+      errors.password = "Password is required.";
+    } else if (password.length < 6) {
+      errors.password = "Password must be at least 6 characters.";
+    }
+
+    if (!number) {
+      errors.number = "Number is required.";
+    } else if (number.length < 10) {
+      errors.number = "Number must be at least 10 characters.";
+    }
+
+    setErrors(errors);
+    setIsFormValid(Object.keys(errors).length === 0);
+  };
+
+  const handleSignUp = async () => {
+    validateForm(); // Trigger validation before attempting to sign in
+
+    if (isFormValid) {
+      try {
+        await createUserWithEmailAndPassword(auth, email, password);
+
+        try {
+          const docRef = await addDoc(collection(db, "test" + email), {
+            Email: email,
+            Address: address,
+            Name: name,
+            Number: number,
+          });
+
+          alert("Successfully Logged In");
+          navigate("/Home");
+        } catch (e) {
+          console.error("Error adding document: ", e.message);
+          alert("Error in adding");
+        }
+      } catch (error) {
+        console.error("Error signing in:", error);
+        alert("Invalid credentials. Please try again.");
+      }
+    }
   };
 
   return (
-    <div className="container" style={{ paddingLeft: "400px", paddingRight: "400px" }}>
+    <div className="container">
       <div className="main">
         <div className="left2" style={{ marginTop: "50px" }}></div>
-        <div className="right2" style={{ marginTop: "50px" }}>
+        <div className="right2" style={{ marginTop: "50px"}}>
           <div className="imgsign"></div>
           <h1 style={{ marginLeft: "180px" }}>Sign Up</h1>
           <br />
-          <form onSubmit={handleSubmit(onSubmit)}>
+          
 
-          <label htmlFor="name">Username</label>
+        
+        <div style={{ marginTop: "50px", paddingLeft: '40px' }}>
+          <input
+          style={{marginBottom: "20px"}}
+            type="text"
+            placeholder="Username..."
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+          />
+          <p style={{ color: "red" }}>{errors.name}</p>
+          <input
+          style={{marginBottom: "20px"}}
+            type="text"
+            placeholder="Phone No. ..."
+            value={number}
+            onChange={(e) => setNumber(e.target.value)}
+          />
+          <p style={{ color: "red" }}>{errors.number}</p>
+          <input
+          style={{marginBottom: "20px"}}
+            type="text"
+            placeholder="Address..."
+            value={address}
+            onChange={(e) => setAddress(e.target.value)}
+          />
+          <p style={{ color: "red" }}>{errors.address}</p>
+          <input
+          style={{marginBottom: "20px"}}
+            type="email"
+            placeholder="Email..."
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+          />
+          <p style={{ color: "red" }}>{errors.email}</p>
             <input
-              {...register("name", {
-                required: "Username is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+$/i,
-                  message: "Invalid username (only letters, numbers, and special characters ._%+- are allowed)",
-                },
-              })}
-              placeholder="Username"
+            style={{marginBottom: "20px"}}
+              type={showPassword ? "text" : "password"}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="Enter Password"
             />
-            {errors.name && <span  style={{color: 'red'}} className="error">{errors.name.message}</span>}
-
-            <label htmlFor="email">Email</label>
-            <input
-              {...register("email", {
-                required: "Email is required",
-                pattern: {
-                  value: /^[A-Z0-9._%+-]+@[A-Z0-9.-]+\.[A-Z]{2,4}$/i,
-                  message: "Invalid email address",
-                },
-              })}
-              placeholder="test@gmail.com"
-            />
-            {errors.email && <span  style={{color: 'red'}}  className="error">{errors.email.message}</span>}
-
-            <label htmlFor="password">Password</label>
-            <input
-              {...register("password", {
-                required: "Password is required",
-                minLength: {
-                  value: 6,
-                  message: "Password must have at least 6 characters",
-                  
-                },
-              })}
-              type="password"
-              placeholder="Password"
-            />
-            {errors.password && <span style={{color: 'red'}} className="error">{errors.password.message}</span>}
-
-            <div className="checkbox">
-              <p>I agree to Terms & Conditions</p>
-            </div>
-            <button className="button1">Create account</button>
-          </form>
+          <p style={{ color: "red" }}>{errors.password}</p>
         </div>
+
+        <button
+         className="button1"
+         style={{marginRight: 40 }}
+          onClick={() => {
+            handleSignUp();
+          }}
+          disabled={!isFormValid}
+        >
+          Sign Up
+        </button>
+    
+        
+        
+      </div>
       </div>
     </div>
   );

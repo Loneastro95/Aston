@@ -44,7 +44,7 @@ const navigate =  useNavigate()
       
 
   return (
-    <div className="container1">
+    <div className="container">
 
         <div className='room'>
             <div className='inspire'>
